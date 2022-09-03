@@ -1,7 +1,6 @@
 """Generate DFDs from Python source code.
 """
 import ast
-from codecs import escape_decode
 import html
 from dataclasses import dataclass
 from typing import Dict, List, Sequence, Tuple, Union
@@ -24,17 +23,25 @@ class DataStoreNode:
     version: int
 
 
-def make_dfd(source: str, hidden_id_list: Sequence[str]) -> tuple[list[ProcessNode], list[DataStoreNode], list[Tuple[Union[ProcessNode, DataStoreNode], Union[ProcessNode, DataStoreNode]]]]:
+def make_dfd(
+        source: str,
+        hidden_id_list: Sequence[str]) -> tuple[
+            list[ProcessNode], list[DataStoreNode],
+            list[Tuple[
+                Union[ProcessNode, DataStoreNode],
+                Union[ProcessNode, DataStoreNode]]]]:
 
     tree = ast.parse(source)
-    already_written_edges: List[Tuple[Union[ProcessNode,
-                                            DataStoreNode], Union[ProcessNode, DataStoreNode]]] = []
+    already_written_edges: List[
+        Tuple[Union[ProcessNode,
+                    DataStoreNode], Union[ProcessNode, DataStoreNode]]] = []
     shown_node_id_with_version: Dict[str, int] = {}
 
     process_node_list: List[ProcessNode] = []
     data_store_node_list: List[DataStoreNode] = []
-    edges: List[Tuple[Union[ProcessNode, DataStoreNode],
-                      Union[ProcessNode, DataStoreNode]]] = []
+    edges: List[Tuple[
+        Union[ProcessNode, DataStoreNode],
+        Union[ProcessNode, DataStoreNode]]] = []
 
     for name in tree._fields:
         for node in getattr(tree, name):
@@ -63,10 +70,11 @@ def make_dfd(source: str, hidden_id_list: Sequence[str]) -> tuple[list[ProcessNo
                 process_code_str = ast.get_source_segment(source, node)
                 if process_code_str is None:
                     process_code_str = ""
-                # process_code_str_escaped = html.escape(process_code_str)
 
                 # Remove isolated process node.
-                if all((rhs_node.id in hidden_id_list for rhs_node in rhs_node_list)) or all((lhs_node.id in hidden_id_list for lhs_node in lhs_node_list)):
+                if all(
+                        (rhs_node.id in hidden_id_list for rhs_node in rhs_node_list)) or \
+                        all((lhs_node.id in hidden_id_list for lhs_node in lhs_node_list)):
                     continue
 
                 current_process_node = ProcessNode(
@@ -91,21 +99,12 @@ def make_dfd(source: str, hidden_id_list: Sequence[str]) -> tuple[list[ProcessNo
                             line_number=rhs_node.lineno,
                             version=shown_node_id_with_version[rhs_node.id])
 
-                        # rhs_node_id_with_version = str(
-                        #     rhs_node.id) + "'" * shown_node_id_with_version[rhs_node.id]
-
                         if (rhs_node_with_version, current_process_node) not in already_written_edges:
                             edges.append(
                                 (rhs_node_with_version, current_process_node))
                             already_written_edges.append(
                                 (rhs_node_with_version, current_process_node))
                             data_store_node_list.append(rhs_node_with_version)
-
-                        # if (rhs_node_id_with_version, node_abbreviation) not in DEPRECATED_already_written_edge:
-                        #     print(
-                        #         f'{rhs_node_id_with_version} --> {node_abbreviation};')
-                        #     DEPRECATED_already_written_edge.append(
-                        #         (rhs_node_id_with_version, node_abbreviation))
 
                 for lhs_node in lhs_node_list:
                     if lhs_node.id not in shown_node_id_with_version:
@@ -135,13 +134,20 @@ def make_dfd(source: str, hidden_id_list: Sequence[str]) -> tuple[list[ProcessNo
 
 
 class MermaidJsGraphExporter:
+    """Export DFD to Mermaid.js graph.
+    """
+    def __init__(self, graph_orientation: str = "LR") -> None:
+        self._graph_orientation = graph_orientation
 
-    def export(self,
-               process_node_list: List[ProcessNode],
-               data_store_node_list: List[DataStoreNode],
-               edges: list[Tuple[Union[ProcessNode, DataStoreNode], Union[ProcessNode, DataStoreNode]]]) -> str:
+    def export(
+        self,
+        process_node_list: List[ProcessNode],
+        data_store_node_list: List[DataStoreNode],
+        edges: list[Tuple[
+            Union[ProcessNode, DataStoreNode],
+            Union[ProcessNode, DataStoreNode]]]) -> str:
 
-        graph_expressions: List[str] = ["graph TD;"]
+        graph_expressions: List[str] = [f"graph {self._graph_orientation};"]
 
         # write process node list
         for process_node in process_node_list:
