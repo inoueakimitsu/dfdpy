@@ -1,0 +1,10 @@
+{
+    "python.linting.flake8Enabled": true,
+    "python.linting.prospectorEnabled": true,
+    "python.linting.pycodestyleEnabled": true,
+    "python.linting.pydocstyleEnabled": true,
+    "python.linting.pylamaEnabled": true,
+    "python.linting.pylintEnabled": true,
+    "python.testing.pytestEnabled": true,
+    "python.linting.banditEnabled": true
+}
