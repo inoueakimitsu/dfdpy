@@ -6,5 +6,6 @@
     "python.linting.pylamaEnabled": true,
     "python.linting.pylintEnabled": true,
     "python.testing.pytestEnabled": true,
-    "python.linting.banditEnabled": true
+    "python.linting.banditEnabled": true,
+    "python.linting.enabled": true
 }
