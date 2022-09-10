@@ -1,10 +1,9 @@
 """Generate DFDs from Python source code.
 """
 import ast
-import html
 from dataclasses import dataclass
 from typing import Dict, List, Sequence, Tuple, Union
-
+from xml.sax.saxutils import escape
 
 @dataclass
 class ProcessNode:
@@ -176,7 +175,10 @@ class MermaidJsGraphExporter:
         raise ValueError(f'Invalid edge: {edge}')
 
     def _get_process_node_expression(self, process_node):
-        escaped_code: str = html.escape(process_node.code)
+        escaped_code: str = escape(process_node.code, entities={
+            "'": "&apos;",
+            "\"": "&quot;"
+        })
         output_str = f'{self._get_process_node_identifier(process_node)}("{escaped_code}");'
         return output_str
 
@@ -184,7 +186,10 @@ class MermaidJsGraphExporter:
         return f'L{process_node.line_number}'
 
     def _get_data_store_node_identifier(self, data_store_node):
-        return html.escape(data_store_node.code) + "'" * data_store_node.version
+        return escape(data_store_node.code, entities={
+        "'": "&apos;",
+        "\"": "&quot;"
+    }) + "'" * data_store_node.version
 
     def _get_data_store_node_expression(self, data_store_node):
         identifier = self._get_data_store_node_identifier(data_store_node)
