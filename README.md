@@ -2,6 +2,8 @@
 
 This project provides a GUI tool and a library to convert Python source code into a Data Flow Diagram (DFD). The GUI tool is built using Streamlit, and the library is named `dfdpy`.
 
+![image](https://github.com/user-attachments/assets/e90fa582-a00e-4413-9214-16038c79fb73)
+
 ## Features
 
 - Convert Python source code to a Data Flow Diagram (DFD).
