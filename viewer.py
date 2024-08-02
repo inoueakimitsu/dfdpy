@@ -2,7 +2,7 @@ import streamlit as st
 import streamlit_mermaid as stmd
 from streamlit_monaco import st_monaco
 
-from dfdpy.python import make_dfd, MermaidJsGraphExporter
+from dfdpy.python import make_dfd, MermaidJsGraphExporter, DrawIOGraphExporter
 
 st.set_page_config(layout="wide", initial_sidebar_state="expanded")
 
@@ -40,3 +40,8 @@ mermaid_code: str = exporter.export(
     process_node_list=process_node_list, data_store_node_list=data_store_node_list, edges=edges)
 
 stmd.st_mermaid(mermaid_code, height="2000px")
+
+drawio_exporter = DrawIOGraphExporter()
+drawio_csv_code: str = drawio_exporter.export(process_node_list, data_store_node_list, edges)
+
+st.text_area(label="Draw.io CSV", value=drawio_csv_code)

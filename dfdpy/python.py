@@ -1,11 +1,12 @@
 """Generate DFDs from Python source code.
 """
 import ast
+import csv
 from dataclasses import dataclass
+from io import StringIO
 from itertools import chain
 from typing import Dict, List, Sequence, Tuple, Union
 from xml.sax.saxutils import escape
-
 
 @dataclass
 class ProcessNode:
@@ -251,3 +252,115 @@ class MermaidJsGraphExporter:
         identifier = self._get_data_store_node_identifier(data_store_node)
         output_str = f'{identifier}["{identifier}"];'
         return output_str
+
+
+class DrawIOGraphExporter:
+    def __init__(self):
+        self.csv_content = []
+        self.node_id_map = {}
+        self.node_refs = {}
+        self.node_types = {}
+        self.next_id = 1
+
+    def export(
+        self,
+        process_node_list: List[ProcessNode],
+        data_store_node_list: List[DataStoreNode],
+        edges: List[Tuple[Union[ProcessNode, DataStoreNode], Union[ProcessNode, DataStoreNode]]]
+    ) -> str:
+        self._add_csv_header()
+        self._add_configuration()
+        self._prepare_nodes(process_node_list, data_store_node_list)
+        self._prepare_edges(edges)
+        self._add_csv_data()
+        return self._get_csv_string()
+
+    def _add_csv_header(self):
+        self.csv_content.append("## Data Flow Diagram")
+
+    def _add_configuration(self):
+        config = [
+            "# label: %name%",
+            "# style: shape=%shape%;fillColor=%fill%;strokeColor=%stroke%;",
+            "# namespace: csvimport-",
+            "# connect: {\"from\": \"refs\", \"to\": \"id\", \"invert\": true, \"style\": \"curved=1;fontSize=11;\"}",
+            "# width: auto",
+            "# height: auto",
+            "# padding: 15",
+            "# ignore: id,shape,fill,stroke",
+            "# nodespacing: 40",
+            "# levelspacing: 100",
+            "# edgespacing: 40",
+            "# layout: auto"
+        ]
+        self.csv_content.extend(config)
+
+    def _prepare_nodes(self, process_node_list: List[ProcessNode], data_store_node_list: List[DataStoreNode]):
+        for node in process_node_list:
+            self._add_node(node, "process")
+        for node in data_store_node_list:
+            self._add_node(node, "data_store")
+
+    def _add_node(self, node: Union[ProcessNode, DataStoreNode], node_type: str):
+        node_id = self._get_next_id()
+        node_name = self._get_node_name(node)
+        self.node_id_map[node_name] = node_id
+        self.node_refs[node_id] = []
+        self.node_types[node_id] = node_type
+
+    def _prepare_edges(self, edges: List[Tuple[Union[ProcessNode, DataStoreNode], Union[ProcessNode, DataStoreNode]]]):
+        for edge in edges:
+            from_node = self._get_node_name(edge[0])
+            to_node = self._get_node_name(edge[1])
+            from_id = self.node_id_map.get(from_node, "")
+            to_id = self.node_id_map.get(to_node, "")
+            if from_id and to_id:
+                self.node_refs[from_id].append(to_id)
+
+    def _add_csv_data(self):
+        self.csv_content.append("## CSV data starts below this line")
+        self.csv_content.append("id,name,shape,fill,stroke,refs")
+        
+        for node_name, node_id in self.node_id_map.items():
+            node_type = self.node_types[node_id]
+            shape = "rectangle" if node_type == "process" else "cylinder"
+            fill = "#dae8fc" if node_type == "process" else "#d5e8d4"
+            stroke = "#6c8ebf" if node_type == "process" else "#82b366"
+            refs = ",".join(self.node_refs[node_id])
+            csv_row = [
+                node_id,
+                self._escape_csv_field(node_name),
+                shape,
+                fill,
+                stroke,
+                refs
+            ]
+            self.csv_content.append(",".join(map(str, csv_row)))
+
+    def _get_node_name(self, node: Union[ProcessNode, DataStoreNode]) -> str:
+        if isinstance(node, ProcessNode):
+            return self._format_process_node(node)
+        elif isinstance(node, DataStoreNode):
+            return f"{node.code}{'_' * node.version}"
+        else:
+            raise ValueError(f"Invalid node type: {type(node)}")
+
+    def _format_process_node(self, node: ProcessNode) -> str:
+        code_lines = node.code.split('\n')
+        formatted_code = '<br>'.join(line.strip() for line in code_lines if line.strip())
+        return f"{formatted_code} [L{node.line_number_begin}-{node.line_number_end}]"
+
+    def _escape_csv_field(self, field: str) -> str:
+        if isinstance(field, str):
+            field = field.replace('"', '""')  # エスケープダブルクォーテーション
+            if ',' in field or '"' in field or '\n' in field:
+                return f'"{field}"'
+        return field
+
+    def _get_csv_string(self) -> str:
+        return '\n'.join(self.csv_content)
+
+    def _get_next_id(self) -> str:
+        id_str = str(self.next_id)
+        self.next_id += 1
+        return id_str
