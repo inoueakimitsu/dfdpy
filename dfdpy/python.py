@@ -281,7 +281,7 @@ class DrawIOGraphExporter:
     def _add_configuration(self):
         config = [
             "# label: %name%",
-            "# style: shape=%shape%;fillColor=%fill%;strokeColor=%stroke%;",
+            "# style: shape=%shape%;fillColor=%fill%;strokeColor=%stroke%;wrap;html=1;align=left;verticalAlign=top;",
             "# namespace: csvimport-",
             "# connect: {\"from\": \"refs\", \"to\": \"id\", \"invert\": true, \"style\": \"curved=1;fontSize=11;\"}",
             "# width: auto",
@@ -291,7 +291,7 @@ class DrawIOGraphExporter:
             "# nodespacing: 40",
             "# levelspacing: 100",
             "# edgespacing: 40",
-            "# layout: auto"
+            "# layout: horizontalflow"
         ]
         self.csv_content.extend(config)
 
@@ -323,7 +323,7 @@ class DrawIOGraphExporter:
         
         for node_name, node_id in self.node_id_map.items():
             node_type = self.node_types[node_id]
-            shape = "rectangle" if node_type == "process" else "cylinder"
+            shape = "rectangle" if node_type == "process" else "ellipse"
             fill = "#dae8fc" if node_type == "process" else "#d5e8d4"
             stroke = "#6c8ebf" if node_type == "process" else "#82b366"
             refs = ",".join(self.node_refs[node_id])
