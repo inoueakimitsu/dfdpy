@@ -250,7 +250,7 @@ class MermaidJsGraphExporter:
             "'": "&apos;",
             "\"": "&quot;",
             " ": "&nbsp;",
-        }) + "'" * data_store_node.version
+        }) + "'" * (data_store_node.version - 1)
 
     def _get_data_store_node_expression(self, data_store_node):
         identifier = self._get_data_store_node_identifier(data_store_node)
@@ -283,9 +283,9 @@ class DrawIOGraphExporter:
         self.csv_content.append("## Data Flow Diagram")
 
     def _add_configuration(self):
-        config = [
+        config = [            
             "# label: %name%",
-            "# style: shape=%shape%;fillColor=%fill%;strokeColor=%stroke%;wrap;html=1;align=left;verticalAlign=top;rounded=%rounded%;arcSize=10;spacing=8;",
+            "# style: shape=%shape%;fillColor=%fill%;strokeColor=%stroke%;wrap;html=1;align=%align%;verticalAlign=%verticalAlign%;rounded=%rounded%;arcSize=10;spacing=0;spacingLeft=6;spacingTop=0;spacingBottom=5;spacingRight=0;autosize=1;",
             "# namespace: csvimport-",
             "# connect: {\"from\": \"refs\", \"to\": \"id\", \"invert\": false, \"style\": \"curved=1;fontSize=11;\"}",
             "# width: auto",
@@ -323,7 +323,7 @@ class DrawIOGraphExporter:
 
     def _add_csv_data(self):
         self.csv_content.append("## CSV data starts below this line")
-        self.csv_content.append("id,name,shape,fill,stroke,rounded,refs")
+        self.csv_content.append("id,name,shape,fill,stroke,rounded,refs,align,verticalAlign")
         
         for node_name, node_id in self.node_id_map.items():
             node_type = self.node_types[node_id]
@@ -332,6 +332,8 @@ class DrawIOGraphExporter:
             stroke = "#6c8ebf" if node_type == "process" else "#82b366"
             rounded = "1" if node_type == "process" else "0"
             refs = '"' + ",".join(self.node_refs[node_id]) + '"'
+            align = "left" if node_type == "process" else "center"
+            verticalAlign = "top" if node_type == "process" else "middle"
             csv_row = [
                 node_id,
                 self._escape_csv_field(node_name),
@@ -340,6 +342,8 @@ class DrawIOGraphExporter:
                 stroke,
                 rounded,
                 refs,
+                align,
+                verticalAlign,
             ]
             # To prevent multiple edges from being generated between the same node,
             # register only if the same record is not already registered.
@@ -358,7 +362,7 @@ class DrawIOGraphExporter:
     def _format_process_node(self, node: ProcessNode) -> str:
         code_lines = re.split(r'\r\n|\r|\n', node.code)
         formatted_code = '<br>'.join(line.replace(" ", "&nbsp;").strip() for line in code_lines if line.strip())
-        return f"{formatted_code} [L{node.line_number_begin}-{node.line_number_end}]"
+        return f"{formatted_code}<br />[L{node.line_number_begin}-{node.line_number_end}]"
 
     def _escape_csv_field(self, field: str) -> str:
         if isinstance(field, str):
