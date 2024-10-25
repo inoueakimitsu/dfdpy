@@ -44,4 +44,4 @@ stmd.st_mermaid(mermaid_code, height="2000px")
 drawio_exporter = DrawIOGraphExporter()
 drawio_csv_code: str = drawio_exporter.export(process_node_list, data_store_node_list, edges)
 
-st.text_area(label="Draw.io CSV", value=drawio_csv_code)
+st.text_area(label="Draw.io compatible CSV", value=drawio_csv_code)
