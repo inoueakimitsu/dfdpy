@@ -362,6 +362,7 @@ class DrawIOGraphExporter:
     def _escape_csv_field(self, field: str) -> str:
         if isinstance(field, str):
             field = field.replace('"', '""')  # エスケープダブルクォーテーション
+            field = field.replace(" ", "&nbsp;")
             if ',' in field or '"' in field or '\n' in field:
                 return f'"{field}"'
         return field
