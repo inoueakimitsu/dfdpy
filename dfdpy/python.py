@@ -5,6 +5,7 @@ import csv
 from dataclasses import dataclass
 from io import StringIO
 from itertools import chain
+import re
 from typing import Dict, List, Sequence, Tuple, Union
 from xml.sax.saxutils import escape
 
@@ -231,11 +232,11 @@ class MermaidJsGraphExporter:
         raise ValueError(f'Invalid edge: {edge}')
 
     def _get_process_node_expression(self, process_node):
-        escaped_code: str = escape(process_node.code, entities={
+        escaped_code: str = re.sub(r'\r\n|\r|\n', "<br />", escape(process_node.code, entities={
             "'": "&apos;",
             "\"": "&quot;",
             " ": "&nbsp;",
-        }).replace("\n", "<br />")
+        }))
         output_str = f'{self._get_process_node_identifier(process_node)}("{escaped_code}' + \
             f'<br />[Line {process_node.line_number_begin}-{process_node.line_number_end}]");' + \
             f'\nstyle {self._get_process_node_identifier(process_node)} text-align:left;'
@@ -355,7 +356,7 @@ class DrawIOGraphExporter:
             raise ValueError(f"Invalid node type: {type(node)}")
 
     def _format_process_node(self, node: ProcessNode) -> str:
-        code_lines = node.code.split('\n')
+        code_lines = re.split(r'\r\n|\r|\n', node.code)
         formatted_code = '<br>'.join(line.replace(" ", "&nbsp;").strip() for line in code_lines if line.strip())
         return f"{formatted_code} [L{node.line_number_begin}-{node.line_number_end}]"
 
