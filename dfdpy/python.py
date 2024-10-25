@@ -216,7 +216,10 @@ class MermaidJsGraphExporter:
         # write edges
         for edge in edges:
             edge_expression = self._get_edge_expression(edge)
-            graph_expressions.append(edge_expression)
+            # To prevent multiple edges from being generated between the same node,
+            # register only if the same record is not already registered.            
+            if edge_expression not in graph_expressions:
+                graph_expressions.append(edge_expression)
 
         return "\n".join(graph_expressions)
 
@@ -335,7 +338,11 @@ class DrawIOGraphExporter:
                 stroke,
                 refs
             ]
-            self.csv_content.append(",".join(map(str, csv_row)))
+            # To prevent multiple edges from being generated between the same node,
+            # register only if the same record is not already registered.
+            csv_row_str: str = ",".join(map(str, csv_row))
+            if csv_row_str not in self.csv_content:
+                self.csv_content.append(csv_row_str)
 
     def _get_node_name(self, node: Union[ProcessNode, DataStoreNode]) -> str:
         if isinstance(node, ProcessNode):
