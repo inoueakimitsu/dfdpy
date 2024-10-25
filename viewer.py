@@ -33,8 +33,12 @@ hidden_identifier_list = [
 source_code = st_monaco(
     value="# write Python code here (Please trim tabs)", language="python", height="300px", lineNumbers=True, minimap=True)
 
-process_node_list, data_store_node_list, edges = make_dfd(
-    source=source_code, hidden_id_list=hidden_identifier_list)
+try:
+    process_node_list, data_store_node_list, edges = make_dfd(
+        source=source_code, hidden_id_list=hidden_identifier_list)
+except IndentationError as e:
+    st.warning(body=str(e))
+    st.stop()
 exporter = MermaidJsGraphExporter(graph_orientation=graph_orientation)
 mermaid_code: str = exporter.export(
     process_node_list=process_node_list, data_store_node_list=data_store_node_list, edges=edges)
