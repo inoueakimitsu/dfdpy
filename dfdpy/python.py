@@ -286,7 +286,7 @@ class DrawIOGraphExporter:
             "# label: %name%",
             "# style: shape=%shape%;fillColor=%fill%;strokeColor=%stroke%;wrap;html=1;align=left;verticalAlign=top;",
             "# namespace: csvimport-",
-            "# connect: {\"from\": \"refs\", \"to\": \"id\", \"invert\": true, \"style\": \"curved=1;fontSize=11;\"}",
+            "# connect: {\"from\": \"refs\", \"to\": \"id\", \"invert\": false, \"style\": \"curved=1;fontSize=11;\"}",
             "# width: auto",
             "# height: auto",
             "# padding: 15",
