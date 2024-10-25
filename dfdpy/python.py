@@ -356,13 +356,12 @@ class DrawIOGraphExporter:
 
     def _format_process_node(self, node: ProcessNode) -> str:
         code_lines = node.code.split('\n')
-        formatted_code = '<br>'.join(line.strip() for line in code_lines if line.strip())
+        formatted_code = '<br>'.join(line.replace(" ", "&nbsp;").strip() for line in code_lines if line.strip())
         return f"{formatted_code} [L{node.line_number_begin}-{node.line_number_end}]"
 
     def _escape_csv_field(self, field: str) -> str:
         if isinstance(field, str):
             field = field.replace('"', '""')  # エスケープダブルクォーテーション
-            field = field.replace(" ", "&nbsp;")
             if ',' in field or '"' in field or '\n' in field:
                 return f'"{field}"'
         return field
