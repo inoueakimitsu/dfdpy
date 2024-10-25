@@ -284,7 +284,7 @@ class DrawIOGraphExporter:
     def _add_configuration(self):
         config = [
             "# label: %name%",
-            "# style: shape=%shape%;fillColor=%fill%;strokeColor=%stroke%;wrap;html=1;align=left;verticalAlign=top;",
+            "# style: shape=%shape%;fillColor=%fill%;strokeColor=%stroke%;wrap;html=1;align=left;verticalAlign=top;rounded=%rounded%;arcSize=10;spacing=8;",
             "# namespace: csvimport-",
             "# connect: {\"from\": \"refs\", \"to\": \"id\", \"invert\": false, \"style\": \"curved=1;fontSize=11;\"}",
             "# width: auto",
@@ -322,21 +322,23 @@ class DrawIOGraphExporter:
 
     def _add_csv_data(self):
         self.csv_content.append("## CSV data starts below this line")
-        self.csv_content.append("id,name,shape,fill,stroke,refs")
+        self.csv_content.append("id,name,shape,fill,stroke,rounded,refs")
         
         for node_name, node_id in self.node_id_map.items():
             node_type = self.node_types[node_id]
-            shape = "rectangle" if node_type == "process" else "ellipse"
+            shape = "rectangle"
             fill = "#dae8fc" if node_type == "process" else "#d5e8d4"
             stroke = "#6c8ebf" if node_type == "process" else "#82b366"
-            refs = ",".join(self.node_refs[node_id])
+            rounded = "1" if node_type == "process" else "0"
+            refs = '"' + ",".join(self.node_refs[node_id]) + '"'
             csv_row = [
                 node_id,
                 self._escape_csv_field(node_name),
                 shape,
                 fill,
                 stroke,
-                refs
+                rounded,
+                refs,
             ]
             # To prevent multiple edges from being generated between the same node,
             # register only if the same record is not already registered.
