@@ -350,7 +350,7 @@ class DrawIOGraphExporter:
         if isinstance(node, ProcessNode):
             return self._format_process_node(node)
         elif isinstance(node, DataStoreNode):
-            return f"{node.code}{'_' * node.version}"
+            return f"{node.code}{'&prime;' * (node.version - 1)}"
         else:
             raise ValueError(f"Invalid node type: {type(node)}")
 
