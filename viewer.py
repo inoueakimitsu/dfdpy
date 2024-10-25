@@ -4,7 +4,7 @@ from streamlit_monaco import st_monaco
 
 from dfdpy.python import make_dfd, MermaidJsGraphExporter, DrawIOGraphExporter
 
-st.set_page_config(layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(layout="wide", initial_sidebar_state="expanded", page_title="Python Code to DFD Converter", page_icon="🔍")
 
 st.title("Python Code to DFD Converter")
 
